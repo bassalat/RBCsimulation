@@ -1,0 +1,135 @@
+---
+title: "RBCmodel"
+author: "Bassalat"
+date: "January 16, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+clear workspace and console
+```{r}
+rm(list=ls())
+cat("\f")
+```
+
+parameters: alpha = 1/3, theta = 0.03, delta = 0.06, phi = 0, rho = 0.85 and sigma = 1%
+
+```{r}
+#Code for Q1 part B
+
+#Define matrices
+M <- matrix(c(0.851275,0.39795,0,0.85), 2, 2, byrow=T)
+P <- matrix(c(0.04339933,1.9012,0.4783,0.5494,-0.434901,1.3518,-1.47875,6.6325), 4, 2, byrow=T)
+print(M)
+print(P)
+Minv <- solve(M)
+
+#At t=0
+kt <- 0
+At <- 0
+stateVec0 <- matrix(c(kt,At), 2, 1, byrow=T)
+OutputVec0 <- P %*% stateVec0
+
+#At t=1
+residVec1 <- matrix(c(0,1), 2, 1, byrow=T)
+##Solve system in the form aX = b
+stateVec1 <- solve(Minv, stateVec0 + Minv%*%residVec1)
+OutputVec0 <- P %*% stateVec0
+
+
+#at t=2
+residVec2 <- matrix(c(0,0), 2, 1, byrow=T)
+stateVec2 <- solve(Minv, stateVec1 + Minv%*%residVec2)
+OutputVec1 <- P %*% stateVec1
+
+#Define time series of variables
+ktseries <- c(stateVec0[1],stateVec1[1])
+ktseries <- c(ktseries,stateVec2[1])
+Atseries <- c(stateVec0[2],stateVec1[2])
+Atseries <- c(Atseries,stateVec2[2])
+ytseries <- c(OutputVec0[1],OutputVec0[1])
+ytseries <- c(ytseries,OutputVec1[1])
+ctseries <- c(OutputVec0[2],OutputVec0[2])
+ctseries <- c(ctseries,OutputVec1[2])
+ntseries <- c(OutputVec0[3],OutputVec0[3])
+ntseries <- c(ntseries,OutputVec1[3])
+itseries <- c(OutputVec0[4],OutputVec0[4])
+itseries <- c(itseries,OutputVec1[4])
+tseries <- 0
+tseries <- c(tseries, 1)
+tseries <- c(tseries, 2)
+
+#Generate variables over time
+t <- 3
+while (t < 22) {
+  residVec3 <- matrix(c(0,0), 2, 1, byrow=T)
+  stateVec3 <- solve(Minv, stateVec2 + Minv%*%residVec3)
+  OutputVec2 <- P %*% stateVec2
+  ktseries <- c(ktseries,stateVec3[1])
+  Atseries <- c(Atseries,stateVec3[2])
+  ytseries <- c(ytseries,OutputVec2[1])
+  ctseries <- c(ctseries,OutputVec2[2])
+  ntseries <- c(ntseries,OutputVec2[3])
+  itseries <- c(itseries,OutputVec2[4])
+  stateVec2 <- stateVec3
+  tseries <- c(tseries, t)
+  t = t + 1 
+}
+
+
+#Check length of series 
+print(length(tseries))
+print(length(ktseries))
+print(length(Atseries))
+print(length(ytseries))
+print(length(ctseries))
+print(length(ntseries))
+print(length(itseries))
+
+#Correction for t-1
+Atseries <- Atseries[1:21]
+ktseries <- ktseries[1:21]
+ytseries <- ytseries[2:22]
+ctseries <- ctseries[2:22]
+ntseries <- ntseries[2:22]
+itseries <- itseries[2:22]
+tseries <- tseries[1:21]
+
+
+#Printing a table
+tbl <- matrix(c(tseries, ktseries, Atseries, ytseries, ctseries, ntseries, itseries),ncol=7,byrow=FALSE)
+colnames(tbl) <- c("t", "kt^", "At^", "yt^", "ct^", "nt^", "it^")
+print(tbl)
+
+
+
+#Plots over time from t=1 to t=20
+ythat <- ts(ytseries[2:21],frequency=1)
+plot(ythat,xlab="time",ylab="ythat",main="ythat with time")
+
+cthat <- ts(ctseries[2:21],frequency=1)
+plot(cthat,xlab="time",ylab="cthat",main="cthat with time")
+
+nthat <- ts(ntseries[2:21],frequency=1)
+plot(nthat,xlab="time",ylab="nthat",main="nthat with time")
+
+ithat <- ts(itseries[2:21],frequency=1)
+plot(ithat,xlab="time",ylab="ithat",main="ithat with time")
+
+#kthat <- ts(ktseries,frequency=1)
+#plot(kthat,xlab="time",ylab="kthat",main="kthat with time")
+
+#Athat <- ts(Atseries,frequency=1)
+#plot(Athat,xlab="time",ylab="Athat",main="Athat with time")
+
+
+```
+
+
+
+
+
+
